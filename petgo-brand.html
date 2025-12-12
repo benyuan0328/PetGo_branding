@@ -268,9 +268,13 @@
             <!-- IG Style Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1 md:gap-6">
                 
-                <!-- Item 1 -->
+                <!-- Item 1: 邊牧餐酒館 (已更新圖片為 dog.jpeg) -->
                 <div class="group relative aspect-square bg-gray-200 overflow-hidden md:rounded-2xl shadow-sm cursor-pointer">
-                    <img src="https://images.unsplash.com/photo-1576201836106-db1758fd1c97?auto=format&fit=crop&w=800&q=80" alt="邊牧餐酒館" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
+                    <!-- 
+                        注意：src="dog.jpeg" 是您指定的圖片檔案。
+                        onerror="..." 是備用機制，當找不到 dog.jpeg 時會顯示網路上的替代圖 (咖啡色邊牧)，確保版面不破圖。
+                    -->
+                    <img src="dog.jpeg" onerror="this.src='https://images.unsplash.com/photo-1505628346881-b72e27784530?auto=format&fit=crop&w=800&q=80'" alt="邊牧餐酒館" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
                     <div class="hover-heart-overlay absolute inset-0 flex flex-col items-center justify-center text-white">
                         <i class="fa-solid fa-heart text-4xl mb-2 text-brand-orange"></i>
                         <p class="font-bold text-lg">邊牧鮮花餐酒館</p>
