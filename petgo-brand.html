@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetGo | 你的寵物友善地圖</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts: 圓體 & Noto Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Varela+Round&display=swap" rel="stylesheet">
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            navy: '#1F3B60',
+                            orange: '#FF9F1C',
+                            white: '#F8FAFC',
+                            light: '#E2E8F0'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Varela Round"', '"Noto Sans TC"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* 全局樣式 */
+        body {
+            font-family: 'Varela Round', 'Noto Sans TC', sans-serif;
+            background-color: #F8FAFC;
+            color: #1F3B60;
+            overflow-x: hidden;
+            cursor: default;
+        }
+
+        /* 隱藏預設滾動條但保留功能 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1F3B60; 
+            border-radius: 4px;
+        }
+
+        /* 腳印特效 (Paw Trail) */
+        .paw-print {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23FF9F1C' d='M226.5 92.9c14.3 42.9-.3 86.2-32.6 96.8s-70.1-15.6-84.4-58.5s.3-86.2 32.6-96.8s70.1 15.6 84.4 58.5zM100.4 198.6c18.9 32.4 14.3 70.1-10.2 84.1s-59.7-.9-78.5-33.3S-2.7 179.3 21.8 165.3s59.7 .9 78.5 33.3zM69.2 401.2C121.6 259.9 214.7 224 256 224s134.4 35.9 186.8 177.2c3.6 9.7 5.2 20.1 5.2 30.5v1.6c0 25.8-20.9 46.7-46.7 46.7c-11.5 0-22.9-1.4-34-4.2l-88-22c-15.3-3.8-31.3-3.8-46.6 0l-88 22c-11.1 2.8-22.5 4.2-34 4.2C84.9 480 64 459.1 64 433.3v-1.6c0-10.4 1.6-20.8 5.2-30.5zM421.8 282.7c-24.5-14-29.1-51.7-10.2-84.1s54-47.3 78.5-33.3s29.1 51.7 10.2 84.1s-54 47.3-78.5 33.3zM310.1 189.7c-32.3-10.6-46.9-53.9-32.6-96.8s52.1-69.1 84.4-58.5s46.9 53.9 32.6 96.8s-52.1 69.1-84.4 58.5z'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            pointer-events: none;
+            opacity: 0.6;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            animation: fadeOut 1s forwards;
+        }
+
+        @keyframes fadeOut {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+            100% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+        }
+
+        /* 打字機游標 */
+        .typewriter-cursor {
+            display: inline-block;
+            width: 3px;
+            background-color: #FF9F1C;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* 背景氣泡動畫 */
+        .bubble {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            z-index: -1;
+            animation: floatUp linear infinite;
+        }
+        .bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            right: 10px;
+            width: 10px;
+            height: 10px;
+            background: inherit;
+            clip-path: polygon(0 0, 100% 0, 100% 100%);
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0.8); opacity: 0; }
+            20% { opacity: 0.8; }
+            80% { opacity: 0.5; }
+            100% { transform: translateY(-20vh) scale(1.2); opacity: 0; }
+        }
+
+        /* 圖片懸停愛心特效 */
+        .hover-heart-overlay {
+            background: rgba(31, 59, 96, 0.4);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .hover-heart-overlay:hover {
+            opacity: 1;
+        }
+        .hover-heart-overlay i {
+            transform: scale(0);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .hover-heart-overlay:hover i {
+            transform: scale(1);
+        }
+
+        /* Instagram Gradient Button */
+        .btn-gradient:hover {
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        /* Tooltip */
+        .tooltip-text {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .btn-gradient:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="relative">
+
+    <!-- 背景特效容器 -->
+    <div id="bubbles-container" class="fixed inset-0 pointer-events-none overflow-hidden h-full w-full z-0 bg-gradient-to-br from-brand-white to-blue-50"></div>
+
+    <!-- 導覽列 -->
+    <nav class="fixed w-full z-50 bg-brand-white/90 backdrop-blur-md shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <div class="w-10 h-10 bg-brand-navy rounded-lg flex items-center justify-center text-white text-xl">
+                        <i class="fa-solid fa-paw"></i>
+                    </div>
+                    <span class="font-bold text-2xl text-brand-navy tracking-tight">PetGo</span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="#about" class="text-brand-navy hover:text-brand-orange font-medium transition">關於我們</a>
+                    <a href="#guide" class="text-brand-navy hover:text-brand-orange font-medium transition">精選探店</a>
+                    <a href="#services" class="text-brand-navy hover:text-brand-orange font-medium transition">合作服務</a>
+                    <a href="#contact" class="px-5 py-2.5 rounded-full bg-brand-navy text-white font-bold hover:bg-brand-orange transition shadow-lg transform hover:-translate-y-1">
+                        Let's Go! 預約探店
+                    </a>
+                </div>
+
+                <!-- Mobile menu button (Simplified) -->
+                <div class="md:hidden flex items-center">
+                    <button class="text-brand-navy hover:text-brand-orange text-2xl">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 首頁 Hero Section -->
+    <header class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-4 z-10 text-center">
+        <div class="max-w-4xl mx-auto">
+            <div class="mb-4 inline-block px-4 py-1.5 rounded-full bg-blue-100 text-brand-navy text-sm font-bold tracking-wide">
+                125+ 貼文實測 · 1.6 萬粉絲信賴
+            </div>
+            <h1 class="text-4xl md:text-6xl font-bold text-brand-navy mb-6 leading-tight min-h-[1.2em]">
+                <span id="typewriter-text"></span><span class="typewriter-cursor">|</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-600 mb-10 max-w-2xl mx-auto">
+                拒絕踩雷！全台最完整的寵物友善地圖，<br>帶毛孩一起探索美好生活。
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="#guide" class="px-8 py-4 rounded-full bg-brand-orange text-white text-lg font-bold shadow-lg hover:bg-orange-600 transition transform hover:scale-105">
+                    <i class="fa-solid fa-map-location-dot mr-2"></i> 開始探索
+                </a>
+                <a href="https://www.instagram.com/petgo.tw/" target="_blank" class="px-8 py-4 rounded-full bg-white text-brand-navy border-2 border-brand-navy text-lg font-bold hover:bg-brand-navy hover:text-white transition">
+                    <i class="fa-brands fa-instagram mr-2"></i> 追蹤 IG
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 關於我們 About Us -->
+    <section id="about" class="py-20 bg-white relative z-10">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <!-- 圖片區 -->
+                <div class="relative">
+                    <div class="absolute -top-4 -left-4 w-24 h-24 bg-brand-orange rounded-full opacity-20 animate-pulse"></div>
+                    <div class="relative rounded-3xl overflow-hidden shadow-2xl rotate-2 hover:rotate-0 transition duration-500">
+                        <!-- 模擬圖片 -->
+                        <div class="bg-gray-200 h-96 flex items-center justify-center text-gray-400">
+                            <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=800&q=80" alt="PetGo About" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                    <!-- 數據卡片 -->
+                    <div class="absolute -bottom-6 -right-6 bg-white p-6 rounded-2xl shadow-xl border-l-4 border-brand-navy">
+                        <div class="text-center">
+                            <span class="block text-3xl font-bold text-brand-navy">1.6萬+</span>
+                            <span class="text-sm text-gray-500">真實粉絲</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 文字內容 (Generated Content) -->
+                <div>
+                    <h2 class="text-brand-orange font-bold uppercase tracking-wider mb-2">About PetGo</h2>
+                    <h3 class="text-3xl md:text-4xl font-bold text-brand-navy mb-6">不只是打卡，更是為了毛孩的笑容。</h3>
+                    <div class="space-y-4 text-gray-600 leading-relaxed text-lg">
+                        <p>
+                            嗨！歡迎來到 PetGo。我們知道，每次帶毛孩出門都是一場冒險——怕餐廳不友善、怕環境不安全，更怕期待落空。
+                        </p>
+                        <p>
+                            這就是 PetGo 存在的意義。成立至今，我們累積超過 <span class="text-brand-orange font-bold">125 篇實測探店</span>，IG 粉絲突破 <span class="text-brand-orange font-bold">1.6 萬</span>。我們拒絕看圖說故事，堅持實際走訪每一個角落。
+                        </p>
+                        <p>
+                            我們不只看裝潢美不美，更看重這是不是一個能讓毛孩放鬆的空間。是否有落地空間？店員是否真心喜愛動物？這些細節，才是我們推薦的標準。跟著 PetGo，讓我們一起發掘那些真正充滿愛的寵物友善空間！
+                        </p>
+                    </div>
+                    <div class="mt-8 flex gap-4">
+                        <span class="px-4 py-2 bg-blue-50 text-brand-navy rounded-lg font-medium">#真實測評</span>
+                        <span class="px-4 py-2 bg-blue-50 text-brand-navy rounded-lg font-medium">#店狗搜查</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 精選探店 Curated Guide -->
+    <section id="guide" class="py-20 bg-brand-navy/5 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-brand-navy mb-4">週末帶毛孩去哪玩？</h2>
+                <p class="text-gray-600">從早午餐到餐酒館，為你精選最適合的去處</p>
+            </div>
+
+            <!-- IG Style Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1 md:gap-6">
+                
+                <!-- Item 1 -->
+                <div class="group relative aspect-square bg-gray-200 overflow-hidden md:rounded-2xl shadow-sm cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1576201836106-db1758fd1c97?auto=format&fit=crop&w=800&q=80" alt="邊牧餐酒館" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
+                    <div class="hover-heart-overlay absolute inset-0 flex flex-col items-center justify-center text-white">
+                        <i class="fa-solid fa-heart text-4xl mb-2 text-brand-orange"></i>
+                        <p class="font-bold text-lg">邊牧鮮花餐酒館</p>
+                        <p class="text-sm opacity-90">台北美食</p>
+                    </div>
+                </div>
+
+                <!-- Item 2 -->
+                <div class="group relative aspect-square bg-gray-200 overflow-hidden md:rounded-2xl shadow-sm cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1617895153857-82fe79adfcd4?auto=format&fit=crop&w=800&q=80" alt="哈士奇早餐" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
+                    <div class="hover-heart-overlay absolute inset-0 flex flex-col items-center justify-center text-white">
+                        <i class="fa-solid fa-heart text-4xl mb-2 text-brand-orange"></i>
+                        <p class="font-bold text-lg">喜旺早餐公司</p>
+                        <p class="text-sm opacity-90">二哈店長</p>
+                    </div>
+                </div>
+
+                <!-- Item 3 -->
+                <div class="group relative aspect-square bg-gray-200 overflow-hidden md:rounded-2xl shadow-sm cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1548681528-6a5c45b66b42?auto=format&fit=crop&w=800&q=80" alt="柯基花藝" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
+                    <div class="hover-heart-overlay absolute inset-0 flex flex-col items-center justify-center text-white">
+                        <i class="fa-solid fa-heart text-4xl mb-2 text-brand-orange"></i>
+                        <p class="font-bold text-lg">玫瑰屋花藝</p>
+                        <p class="text-sm opacity-90">柯基 x 花店</p>
+                    </div>
+                </div>
+
+                <!-- Item 4 (Placeholder) -->
+                <div class="group relative aspect-square bg-gray-200 overflow-hidden md:rounded-2xl shadow-sm cursor-pointer hidden md:block">
+                    <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80" alt="貓咪咖啡" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
+                    <div class="hover-heart-overlay absolute inset-0 flex flex-col items-center justify-center text-white">
+                        <i class="fa-solid fa-heart text-4xl mb-2 text-brand-orange"></i>
+                        <p class="font-bold text-lg">午後貓咪咖啡</p>
+                    </div>
+                </div>
+
+                <!-- Item 5 (Placeholder) -->
+                <div class="group relative aspect-square bg-gray-200 overflow-hidden md:rounded-2xl shadow-sm cursor-pointer hidden md:block">
+                    <img src="https://images.unsplash.com/photo-1534361960057-19889db9621e?auto=format&fit=crop&w=800&q=80" alt="大草皮跑跑" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
+                    <div class="hover-heart-overlay absolute inset-0 flex flex-col items-center justify-center text-white">
+                        <i class="fa-solid fa-heart text-4xl mb-2 text-brand-orange"></i>
+                        <p class="font-bold text-lg">森呼吸農場</p>
+                    </div>
+                </div>
+
+                <!-- Item 6 (Placeholder) -->
+                <div class="group relative aspect-square bg-brand-navy overflow-hidden md:rounded-2xl shadow-sm cursor-pointer flex items-center justify-center">
+                    <div class="text-center p-6">
+                        <h3 class="text-2xl font-bold text-white mb-2">更多推薦</h3>
+                        <p class="text-white/80 mb-4">都在我們的 Instagram</p>
+                        <a href="https://www.instagram.com/petgo.tw/" class="inline-block px-6 py-2 bg-white text-brand-navy rounded-full font-bold hover:bg-brand-orange hover:text-white transition">GO!</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 熱門主題 (Trending Now Integrated) -->
+            <div class="mt-16">
+                <h3 class="text-2xl font-bold text-brand-navy mb-8 flex items-center">
+                    <i class="fa-solid fa-fire text-red-500 mr-3"></i> 本週熱門話題
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Trending 1 -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition border border-gray-100">
+                        <div class="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-xl mb-4">
+                            <i class="fa-solid fa-wine-glass"></i>
+                        </div>
+                        <h4 class="font-bold text-xl text-brand-navy mb-2">台北唯一！邊牧鮮花餐酒館</h4>
+                        <p class="text-gray-600 text-sm mb-3">7.4 萬次觀看！沈浸在鮮花與邊境牧羊犬的浪漫晚餐體驗。</p>
+                        <div class="text-xs text-brand-orange font-medium space-x-2">
+                            <span>#台北美食</span> <span>#寵物友善</span>
+                        </div>
+                    </div>
+
+                    <!-- Trending 2 -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition border border-gray-100">
+                        <div class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center text-xl mb-4">
+                            <i class="fa-solid fa-utensils"></i>
+                        </div>
+                        <h4 class="font-bold text-xl text-brand-navy mb-2">台北超甜！哈士奇早餐店</h4>
+                        <p class="text-gray-600 text-sm mb-3">喜旺早餐公司，看二哈店長如何用眼神「熱情」招呼客人。</p>
+                        <div class="text-xs text-brand-orange font-medium space-x-2">
+                            <span>#早午餐</span> <span>#哈士奇</span>
+                        </div>
+                    </div>
+
+                    <!-- Trending 3 -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition border border-gray-100">
+                        <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xl mb-4">
+                            <i class="fa-solid fa-leaf"></i>
+                        </div>
+                        <h4 class="font-bold text-xl text-brand-navy mb-2">台北唯一！柯基花藝店</h4>
+                        <p class="text-gray-600 text-sm mb-3">玫瑰屋花藝植坊，被花草與短腿柯基包圍的療癒午後。</p>
+                        <div class="text-xs text-brand-orange font-medium space-x-2">
+                            <span>#花店</span> <span>#柯基</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 合作服務 Work With Us -->
+    <section id="services" class="py-20 bg-white relative z-10">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-12">
+                <span class="text-brand-orange font-bold tracking-wider uppercase">Business</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-brand-navy mt-2">讓流量變現，讓顧客愛上你的品牌</h2>
+            </div>
+            
+            <div class="bg-blue-50 rounded-3xl p-8 md:p-12 shadow-inner border border-blue-100">
+                <div class="prose max-w-none text-gray-700">
+                    <p class="mb-6 text-lg leading-relaxed font-medium">
+                        在 PetGo，我們深知餐廳老闆與品牌主的痛點：有好的空間與產品，卻接觸不到精準的飼主客群。我們提供的不是單純的「廣告」，而是具有情感連結的「內容行銷」。
+                    </p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                        <div class="flex gap-4">
+                            <div class="flex-shrink-0 w-10 h-10 bg-brand-navy text-white rounded-full flex items-center justify-center">
+                                <i class="fa-solid fa-video"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-brand-navy text-lg">沉浸式短影音開箱</h4>
+                                <p class="text-sm mt-1">高質感 Reels 真實呈現環境與餐點。我們曾創下單支影片 7.4 萬次觀看的紀錄，讓您的店成為爆款熱點。</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4">
+                            <div class="flex-shrink-0 w-10 h-10 bg-brand-navy text-white rounded-full flex items-center justify-center">
+                                <i class="fa-solid fa-bullseye"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-brand-navy text-lg">精準社群曝光</h4>
+                                <p class="text-sm mt-1">直接對接 1.6 萬名高黏著度飼主。我們的粉絲都是「週末一定要帶毛孩出門」的行動派。</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4">
+                            <div class="flex-shrink-0 w-10 h-10 bg-brand-navy text-white rounded-full flex items-center justify-center">
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-brand-navy text-lg">店狗/店貓 IP 營造</h4>
+                                <p class="text-sm mt-1">您的店狗太可愛卻沒人知道？我們用鏡頭語言打造「明星店長」，創造粉絲為了看牠而來的強大拉力。</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4">
+                            <div class="flex-shrink-0 w-10 h-10 bg-brand-navy text-white rounded-full flex items-center justify-center">
+                                <i class="fa-solid fa-handshake"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-brand-navy text-lg">寵物友善顧問</h4>
+                                <p class="text-sm mt-1">提供專業的飼主視角環境優化建議，減少客訴，大幅提升顧客回訪率。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 聯絡我們 Contact (iOS Style) -->
+    <section id="contact" class="py-24 bg-brand-navy relative overflow-hidden">
+        <!-- 背景裝飾 -->
+        <div class="absolute top-0 left-0 w-full h-full opacity-10">
+            <i class="fa-solid fa-paw absolute top-10 left-10 text-9xl text-white transform -rotate-12"></i>
+            <i class="fa-solid fa-comment-dots absolute bottom-10 right-10 text-9xl text-white transform rotate-12"></i>
+        </div>
+
+        <div class="max-w-3xl mx-auto px-4 relative z-10 text-center">
+            
+            <!-- iOS Notification Style Box -->
+            <div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-8 md:p-12 shadow-2xl transform transition hover:scale-105 duration-300">
+                <div class="flex items-center justify-center mb-6">
+                    <div class="bg-brand-orange w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg">
+                        <i class="fa-solid fa-envelope text-3xl text-white"></i>
+                    </div>
+                </div>
+                
+                <h2 class="text-3xl font-bold text-white mb-4">有合作想法嗎？</h2>
+                <p class="text-blue-200 mb-8 text-lg">就像朋友傳訊息一樣簡單，期待收到您的來信！</p>
+                
+                <a href="mailto:petgo20241219@gmail.com" class="btn-gradient inline-flex items-center justify-center w-full md:w-auto px-8 py-4 rounded-xl bg-white text-brand-navy font-bold text-xl transition-all duration-300 relative group">
+                    <span>Send Message @PetGo.tw</span>
+                    <i class="fa-regular fa-paper-plane ml-3"></i>
+                    
+                    <!-- Tooltip -->
+                    <span class="tooltip-text absolute -top-12 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-3 rounded whitespace-nowrap">
+                        立即討論合作！
+                        <svg class="absolute text-black h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                    </span>
+                </a>
+
+                <!-- Social Cards -->
+                <div class="mt-12 flex flex-col md:flex-row justify-center gap-6">
+                    <a href="https://www.instagram.com/petgo.tw/" class="flex items-center p-4 bg-white/5 rounded-xl hover:bg-white/20 transition border border-white/10">
+                        <i class="fa-brands fa-instagram text-3xl text-pink-400 mr-4"></i>
+                        <div class="text-left">
+                            <div class="text-white font-bold">Instagram</div>
+                            <div class="text-blue-200 text-sm">@PetGo.tw</div>
+                        </div>
+                    </a>
+                    
+                    <a href="mailto:petgo20241219@gmail.com" class="flex items-center p-4 bg-white/5 rounded-xl hover:bg-white/20 transition border border-white/10">
+                        <i class="fa-solid fa-envelope text-3xl text-brand-orange mr-4"></i>
+                        <div class="text-left">
+                            <div class="text-white font-bold">Email</div>
+                            <div class="text-blue-200 text-sm">petgo20241219...</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <footer class="mt-12 text-blue-300 text-sm">
+                <p>&copy; 2025 PetGo. All rights reserved.</p>
+                <p class="mt-2">Made with <i class="fa-solid fa-heart text-red-500 animate-pulse"></i> for Pets</p>
+            </footer>
+        </div>
+    </section>
+
+    <!-- JavaScript Scripts -->
+    <script>
+        // 1. 打字機特效
+        const textElement = document.getElementById('typewriter-text');
+        const phrases = [
+            "發掘各地寵物友善店家...",
+            "全台最可愛的小店長都在這...",
+            "週末帶毛孩去哪玩？"
+        ];
+        let phraseIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        let typeSpeed = 100;
+
+        function typeWriter() {
+            const currentPhrase = phrases[phraseIndex];
+            
+            if (isDeleting) {
+                textElement.textContent = currentPhrase.substring(0, charIndex - 1);
+                charIndex--;
+                typeSpeed = 50;
+            } else {
+                textElement.textContent = currentPhrase.substring(0, charIndex + 1);
+                charIndex++;
+                typeSpeed = 100;
+            }
+
+            if (!isDeleting && charIndex === currentPhrase.length) {
+                isDeleting = true;
+                typeSpeed = 2000; // 停頓久一點
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                phraseIndex = (phraseIndex + 1) % phrases.length;
+                typeSpeed = 500;
+            }
+
+            setTimeout(typeWriter, typeSpeed);
+        }
+
+        // 2. 腳印拖尾特效 (Paw Print Trail)
+        let lastPawTime = 0;
+        document.addEventListener('mousemove', (e) => {
+            const now = Date.now();
+            // 限制產生頻率，避免過多 DOM 元素卡頓 (每100ms產生一個)
+            if (now - lastPawTime > 100) {
+                createPaw(e.clientX, e.clientY);
+                lastPawTime = now;
+            }
+        });
+
+        function createPaw(x, y) {
+            const paw = document.createElement('div');
+            paw.classList.add('paw-print');
+            paw.style.left = `${x}px`;
+            paw.style.top = `${y}px`;
+            
+            // 隨機旋轉角度，讓腳印看起來更自然
+            const rotation = Math.random() * 60 - 30; // -30deg to 30deg
+            paw.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+            
+            document.body.appendChild(paw);
+
+            // 動畫結束後移除元素
+            setTimeout(() => {
+                paw.remove();
+            }, 1000);
+        }
+
+        // 3. 背景氣泡生成
+        function createBubbles() {
+            const container = document.getElementById('bubbles-container');
+            const bubbleCount = 15;
+
+            for (let i = 0; i < bubbleCount; i++) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                
+                // 隨機大小、位置、動畫延遲
+                const size = Math.random() * 60 + 20 + 'px';
+                bubble.style.width = size;
+                bubble.style.height = size;
+                bubble.style.left = Math.random() * 100 + '%';
+                bubble.style.animationDuration = Math.random() * 10 + 10 + 's'; // 10-20s
+                bubble.style.animationDelay = Math.random() * 10 + 's';
+                
+                container.appendChild(bubble);
+            }
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            typeWriter();
+            createBubbles();
+        });
+    </script>
+</body>
+</html>
