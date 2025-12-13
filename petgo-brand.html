@@ -1,625 +1,351 @@
 <!DOCTYPE html>
-<html lang="zh-TW" class="scroll-smooth">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    
-    <!-- SEO Meta Tags -->
-    <title>PetGo | 你的寵物友善地圖 - 帶毛孩探索美好生活</title>
-    <meta name="description" content="PetGo 是專注於寵物友善餐廳推廣的自媒體品牌。我們提供超過 125 篇真實探店實測，幫助飼主找到適合帶毛孩去的早午餐、餐酒館與大草皮。拒絕踩雷，跟著 PetGo 一起出發！">
-    <meta name="keywords" content="寵物友善餐廳, 寵物友善, 台北寵物友善, 帶狗吃飯, 寵物探店, PetGo, 邊境牧羊犬, 哈士奇, 柯基, 寵物旅遊">
-    <meta name="author" content="PetGo">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://www.petgo.tw/">
-
-    <!-- Open Graph (FB/LINE/IG 分享設定) -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://www.petgo.tw/">
-    <meta property="og:title" content="PetGo | 你的寵物友善地圖 - 週末帶毛孩去哪玩？">
-    <meta property="og:description" content="1.6 萬粉絲信賴！全台最完整的寵物友善地圖。我們不只看裝潢，更看重毛孩的真實體驗。立即查看精選探店指南！">
-    <meta property="og:image" content="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=1200&q=80">
-    <meta property="og:site_name" content="PetGo 寵物友善地圖">
-    <meta property="og:locale" content="zh_TW">
-
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="PetGo | 你的寵物友善地圖">
-    <meta name="twitter:description" content="拒絕踩雷！全台最完整的寵物友善地圖，帶毛孩一起探索美好生活。">
-    <meta name="twitter:image" content="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=1200&q=80">
-
-    <!-- Tailwind CSS -->
+    <title>財務績效視覺化儀表板</title>
+    <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons (圖標庫) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts: 圓體 & Noto Sans -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Varela+Round&display=swap" rel="stylesheet">
-
-    <!-- Tailwind Config -->
+    <!-- 自定義配置 -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            navy: '#1F3B60',
-                            orange: '#FF9F1C',
-                            white: '#F8FAFC',
-                            light: '#E2E8F0'
+                        corp: {
+                            900: '#0f172a', // Sidebar bg
+                            800: '#1e293b', // Sidebar item bg
+                            700: '#334155', // Hover
+                            600: '#2563eb', // Active Highlight (Blue)
+                            50: '#f8fafc',  // Main bg
                         }
                     },
                     fontFamily: {
-                        sans: ['"Varela Round"', '"Noto Sans TC"', 'sans-serif'],
+                        sans: ['Inter', 'Microsoft JhengHei', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
-
     <style>
-        /* 全局樣式 */
-        body {
-            font-family: 'Varela Round', 'Noto Sans TC', sans-serif;
-            background-color: #F8FAFC;
-            color: #1F3B60;
-            overflow-x: hidden;
-            cursor: default;
+        /* 簡單的淡入動畫 */
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
         }
-
-        /* 隱藏預設滾動條但保留功能 */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1F3B60; 
-            border-radius: 4px;
-        }
-
-        /* 腳印特效 (Paw Trail) */
-        .paw-print {
-            position: fixed;
-            width: 20px;
-            height: 20px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23FF9F1C' d='M226.5 92.9c14.3 42.9-.3 86.2-32.6 96.8s-70.1-15.6-84.4-58.5s.3-86.2 32.6-96.8s70.1 15.6 84.4 58.5zM100.4 198.6c18.9 32.4 14.3 70.1-10.2 84.1s-59.7-.9-78.5-33.3S-2.7 179.3 21.8 165.3s59.7 .9 78.5 33.3zM69.2 401.2C121.6 259.9 214.7 224 256 224s134.4 35.9 186.8 177.2c3.6 9.7 5.2 20.1 5.2 30.5v1.6c0 25.8-20.9 46.7-46.7 46.7c-11.5 0-22.9-1.4-34-4.2l-88-22c-15.3-3.8-31.3-3.8-46.6 0l-88 22c-11.1 2.8-22.5 4.2-34 4.2C84.9 480 64 459.1 64 433.3v-1.6c0-10.4 1.6-20.8 5.2-30.5zM421.8 282.7c-24.5-14-29.1-51.7-10.2-84.1s54-47.3 78.5-33.3s29.1 51.7 10.2 84.1s-54 47.3-78.5 33.3zM310.1 189.7c-32.3-10.6-46.9-53.9-32.6-96.8s52.1-69.1 84.4-58.5s46.9 53.9 32.6 96.8s-52.1 69.1-84.4 58.5z'/%3E%3C/svg%3E");
-            background-size: contain;
-            background-repeat: no-repeat;
-            pointer-events: none;
-            opacity: 0.6;
-            z-index: 9999;
-            transform: translate(-50%, -50%);
-            animation: fadeOut 1s forwards;
-        }
-
-        @keyframes fadeOut {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-            100% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-        }
-
-        /* 打字機游標 */
-        .typewriter-cursor {
-            display: inline-block;
-            width: 3px;
-            background-color: #FF9F1C;
-            animation: blink 1s infinite;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-
-        /* 背景氣泡動畫 */
-        .bubble {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-            z-index: -1;
-            animation: floatUp linear infinite;
-        }
-        .bubble::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            right: 10px;
-            width: 10px;
-            height: 10px;
-            background: inherit;
-            clip-path: polygon(0 0, 100% 0, 100% 100%);
-        }
-
-        @keyframes floatUp {
-            0% { transform: translateY(100vh) scale(0.8); opacity: 0; }
-            20% { opacity: 0.8; }
-            80% { opacity: 0.5; }
-            100% { transform: translateY(-20vh) scale(1.2); opacity: 0; }
-        }
-
-        /* 圖片懸停愛心特效 */
-        .hover-heart-overlay {
-            background: rgba(31, 59, 96, 0.4);
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-        .hover-heart-overlay:hover {
-            opacity: 1;
-        }
-        .hover-heart-overlay i {
-            transform: scale(0);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .hover-heart-overlay:hover i {
-            transform: scale(1);
-        }
-
-        /* Instagram Gradient Button */
-        .btn-gradient:hover {
-            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        @keyframes fadeIn {
+            from { opacity: 0.5; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Tooltip */
-        .tooltip-text {
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.3s;
+        /* 隱藏滾動條但保持功能 (Optional) */
+        .no-scrollbar::-webkit-scrollbar {
+            width: 8px;
         }
-        .btn-gradient:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
+        .no-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        .no-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
         }
     </style>
 </head>
-<body class="relative">
+<body class="bg-corp-50 text-slate-800 h-screen overflow-hidden flex font-sans">
 
-    <!-- 背景特效容器 -->
-    <div id="bubbles-container" class="fixed inset-0 pointer-events-none overflow-hidden h-full w-full z-0 bg-gradient-to-br from-brand-white to-blue-50"></div>
-
-    <!-- 導覽列 -->
-    <nav class="fixed w-full z-50 bg-brand-white/90 backdrop-blur-md shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16 md:h-20"> <!-- 手機版高度略減 -->
-                <!-- Logo -->
-                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer" onclick="window.scrollTo(0,0)">
-                    <div class="w-9 h-9 md:w-10 md:h-10 bg-brand-navy rounded-lg flex items-center justify-center text-white text-lg md:text-xl">
-                        <i class="fa-solid fa-paw"></i>
-                    </div>
-                    <span class="font-bold text-xl md:text-2xl text-brand-navy tracking-tight">PetGo</span>
+    <!-- 左側導航欄 (Sidebar) - 佔寬 25% (在大螢幕上固定寬度較佳，此處設為 w-72 約 280px) -->
+    <aside class="w-72 bg-corp-900 text-slate-300 flex flex-col shadow-2xl z-20 transition-all duration-300">
+        
+        <!-- Logo / 標題區 -->
+        <div class="p-6 border-b border-slate-700 bg-corp-900 z-10">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-lg text-white">
+                    <i data-lucide="bar-chart-2" class="w-6 h-6"></i>
                 </div>
+                <div>
+                    <h1 class="text-white font-bold text-lg tracking-wide">財務戰情室</h1>
+                    <p class="text-xs text-slate-400">Financial Dashboard</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 選單區 -->
+        <nav class="flex-1 overflow-y-auto no-scrollbar py-4" id="sidebar-menu">
+            <!-- 選單內容將由 JavaScript 動態生成 -->
+        </nav>
+
+        <!-- 底部使用者資訊 -->
+        <div class="p-4 border-t border-slate-700 bg-corp-900">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-slate-600 flex items-center justify-center text-white text-xs font-bold">
+                    FM
+                </div>
+                <div>
+                    <p class="text-sm text-white">財務經理</p>
+                    <p class="text-xs text-slate-500">View Only Mode</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 右側展示區 (Main Content) - 佔據剩餘空間 -->
+    <main class="flex-1 flex flex-col h-screen relative">
+        
+        <!-- 頂部資訊列 (Header) -->
+        <header class="bg-white h-16 shadow-sm border-b border-slate-200 flex items-center justify-between px-8 z-10">
+            <div>
+                <!-- 麵包屑導航 -->
+                <nav class="flex items-center text-sm text-slate-500">
+                    <span class="hover:text-blue-600 cursor-pointer">首頁</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 mx-2"></i>
+                    <span id="breadcrumb-category" class="font-medium text-slate-700">類別</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 mx-2"></i>
+                    <span id="breadcrumb-item" class="font-bold text-blue-700">項目</span>
+                </nav>
+            </div>
+            <div class="flex items-center gap-4">
+                <span id="current-date" class="text-sm text-slate-500 font-mono"></span>
+                <button onclick="toggleFullScreen()" class="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="全螢幕">
+                    <i data-lucide="expand" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- 圖片展示容器 -->
+        <div class="flex-1 p-6 bg-slate-100 overflow-hidden flex flex-col">
+            <!-- 圖片卡片 -->
+            <div class="bg-white rounded-xl shadow-lg border border-slate-200 flex-1 flex flex-col overflow-hidden relative group">
                 
-                <!-- Desktop Menu -->
-                <div class="hidden md:flex space-x-8 items-center">
-                    <a href="#about" class="text-brand-navy hover:text-brand-orange font-medium transition">關於我們</a>
-                    <a href="#guide" class="text-brand-navy hover:text-brand-orange font-medium transition">精選探店</a>
-                    <a href="#services" class="text-brand-navy hover:text-brand-orange font-medium transition">合作服務</a>
-                    <a href="#contact" class="px-5 py-2.5 rounded-full bg-brand-navy text-white font-bold hover:bg-brand-orange transition shadow-lg transform hover:-translate-y-1">
-                        Let's Go! 預約探店
-                    </a>
-                </div>
-
-                <!-- Mobile menu button (Simplified) -->
-                <div class="md:hidden flex items-center">
-                    <button class="text-brand-navy hover:text-brand-orange text-2xl p-2">
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- 首頁 Hero Section -->
-    <!-- 調整：手機版 padding 縮小，視覺更集中 -->
-    <header class="relative pt-28 pb-16 lg:pt-48 lg:pb-32 px-4 z-10 text-center">
-        <div class="max-w-4xl mx-auto">
-            <div class="mb-4 inline-block px-4 py-1.5 rounded-full bg-blue-100 text-brand-navy text-xs md:text-sm font-bold tracking-wide">
-                125+ 貼文實測 · 1.6 萬粉絲信賴
-            </div>
-            <!-- 調整：手機版字體調整為 text-4xl -->
-            <h1 class="text-4xl md:text-6xl font-bold text-brand-navy mb-6 leading-tight min-h-[1.2em]">
-                <span id="typewriter-text"></span><span class="typewriter-cursor">|</span>
-            </h1>
-            <p class="text-lg md:text-2xl text-gray-600 mb-10 max-w-2xl mx-auto px-4">
-                拒絕踩雷！全台最完整的寵物友善地圖，<br class="hidden md:block">帶毛孩一起探索美好生活。
-            </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4 px-8 sm:px-0">
-                <a href="#guide" class="px-8 py-3 md:py-4 rounded-full bg-brand-orange text-white text-lg font-bold shadow-lg hover:bg-orange-600 transition transform hover:scale-105">
-                    <i class="fa-solid fa-map-location-dot mr-2"></i> 開始探索
-                </a>
-                <a href="https://www.instagram.com/petgo.tw/" target="_blank" class="px-8 py-3 md:py-4 rounded-full bg-white text-brand-navy border-2 border-brand-navy text-lg font-bold hover:bg-brand-navy hover:text-white transition">
-                    <i class="fa-brands fa-instagram mr-2"></i> 追蹤 IG
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <!-- 關於我們 About Us -->
-    <section id="about" class="py-16 md:py-20 bg-white relative z-10">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
-                <!-- 圖片區 -->
-                <div class="relative px-4 md:px-0 order-1"> <!-- 手機版確保圖片不會太貼邊 -->
-                    <div class="absolute -top-4 -left-4 w-20 md:w-24 h-20 md:h-24 bg-brand-orange rounded-full opacity-20 animate-pulse"></div>
-                    <div class="relative rounded-3xl overflow-hidden shadow-2xl rotate-2 hover:rotate-0 transition duration-500">
-                        <!-- 模擬圖片 -->
-                        <div class="bg-gray-200 h-64 md:h-96 flex items-center justify-center text-gray-400">
-                            <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=800&q=80" alt="PetGo 團隊介紹 - 寵物友善推薦" class="w-full h-full object-cover">
-                        </div>
-                    </div>
-                    <!-- 數據卡片 -->
-                    <div class="absolute -bottom-6 -right-2 md:-right-6 bg-white p-4 md:p-6 rounded-2xl shadow-xl border-l-4 border-brand-navy">
-                        <div class="text-center">
-                            <span class="block text-2xl md:text-3xl font-bold text-brand-navy">1.6萬+</span>
-                            <span class="text-xs md:text-sm text-gray-500">真實粉絲</span>
-                        </div>
+                <!-- 標題列 -->
+                <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
+                    <h2 id="chart-title" class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i data-lucide="pie-chart" class="w-5 h-5 text-blue-600"></i>
+                        <span>載入中...</span>
+                    </h2>
+                    <div class="flex gap-2">
+                         <span class="text-xs font-semibold px-2 py-1 bg-blue-50 text-blue-700 rounded border border-blue-100">Live Data</span>
                     </div>
                 </div>
 
-                <!-- 文字內容 -->
-                <div class="order-2 mt-8 md:mt-0">
-                    <h2 class="text-brand-orange font-bold uppercase tracking-wider mb-2">About PetGo</h2>
-                    <h3 class="text-2xl md:text-4xl font-bold text-brand-navy mb-6">不只是打卡，更是為了毛孩的笑容。</h3>
-                    <div class="space-y-4 text-gray-600 leading-relaxed text-base md:text-lg">
-                        <p>
-                            嗨！歡迎來到 PetGo。我們知道，每次帶毛孩出門都是一場冒險——怕餐廳不友善、怕環境不安全，更怕期待落空。
-                        </p>
-                        <p>
-                            這就是 PetGo 存在的意義。成立至今，我們累積超過 <span class="text-brand-orange font-bold">125 篇實測探店</span>，IG 粉絲突破 <span class="text-brand-orange font-bold">1.6 萬</span>。我們拒絕看圖說故事，堅持實際走訪每一個角落。
-                        </p>
-                        <p>
-                            我們不只看裝潢美不美，更看重這是不是一個能讓毛孩放鬆的空間。是否有落地空間？店員是否真心喜愛動物？這些細節，才是我們推薦的標準。
-                        </p>
-                    </div>
-                    <div class="mt-8 flex flex-wrap gap-3">
-                        <span class="px-4 py-2 bg-blue-50 text-brand-navy rounded-lg font-medium text-sm md:text-base">#真實測評</span>
-                        <span class="px-4 py-2 bg-blue-50 text-brand-navy rounded-lg font-medium text-sm md:text-base">#店狗搜查</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 精選探店 Curated Guide -->
-    <section id="guide" class="py-16 md:py-20 bg-brand-navy/5 relative z-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6">
-            <div class="text-center mb-12 md:mb-16">
-                <h2 class="text-2xl md:text-4xl font-bold text-brand-navy mb-4">週末帶毛孩去哪玩？</h2>
-                <p class="text-gray-600">從早午餐到餐酒館，為你精選最適合的去處</p>
-            </div>
-
-            <!-- IG Style Grid -->
-            <!-- 調整：手機版 gap 更小 (gap-1)，模擬 IG 緊湊感 -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-                
-                <!-- Item 1: 邊牧餐酒館 (已還原為原始圖片) -->
-                <div class="group relative aspect-square bg-gray-200 overflow-hidden rounded-xl md:rounded-2xl shadow-sm cursor-pointer">
-                    <img src="https://images.unsplash.com/photo-1576201836106-db1758fd1c97?auto=format&fit=crop&w=800&q=80" alt="邊牧鮮花餐酒館 - 台北寵物友善餐廳" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
-                    <div class="hover-heart-overlay absolute inset-0 flex flex-col items-center justify-center text-white">
-                        <i class="fa-solid fa-heart text-4xl mb-2 text-brand-orange"></i>
-                        <p class="font-bold text-lg">邊牧鮮花餐酒館</p>
-                        <p class="text-sm opacity-90">台北美食</p>
-                    </div>
-                </div>
-
-                <!-- Item 2 -->
-                <div class="group relative aspect-square bg-gray-200 overflow-hidden rounded-xl md:rounded-2xl shadow-sm cursor-pointer">
-                    <img src="https://images.unsplash.com/photo-1617895153857-82fe79adfcd4?auto=format&fit=crop&w=800&q=80" alt="哈士奇早餐店 - 喜旺早餐公司" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
-                    <div class="hover-heart-overlay absolute inset-0 flex flex-col items-center justify-center text-white">
-                        <i class="fa-solid fa-heart text-4xl mb-2 text-brand-orange"></i>
-                        <p class="font-bold text-lg">喜旺早餐公司</p>
-                        <p class="text-sm opacity-90">二哈店長</p>
-                    </div>
-                </div>
-
-                <!-- Item 3 -->
-                <div class="group relative aspect-square bg-gray-200 overflow-hidden rounded-xl md:rounded-2xl shadow-sm cursor-pointer">
-                    <img src="https://images.unsplash.com/photo-1548681528-6a5c45b66b42?auto=format&fit=crop&w=800&q=80" alt="柯基花藝店 - 玫瑰屋" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
-                    <div class="hover-heart-overlay absolute inset-0 flex flex-col items-center justify-center text-white">
-                        <i class="fa-solid fa-heart text-4xl mb-2 text-brand-orange"></i>
-                        <p class="font-bold text-lg">玫瑰屋花藝</p>
-                        <p class="text-sm opacity-90">柯基 x 花店</p>
-                    </div>
-                </div>
-
-                <!-- Item 4 -->
-                <div class="group relative aspect-square bg-gray-200 overflow-hidden rounded-xl md:rounded-2xl shadow-sm cursor-pointer hidden md:block">
-                    <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80" alt="午後貓咪咖啡" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
-                    <div class="hover-heart-overlay absolute inset-0 flex flex-col items-center justify-center text-white">
-                        <i class="fa-solid fa-heart text-4xl mb-2 text-brand-orange"></i>
-                        <p class="font-bold text-lg">午後貓咪咖啡</p>
-                    </div>
-                </div>
-
-                <!-- Item 5 -->
-                <div class="group relative aspect-square bg-gray-200 overflow-hidden rounded-xl md:rounded-2xl shadow-sm cursor-pointer hidden md:block">
-                    <img src="https://images.unsplash.com/photo-1534361960057-19889db9621e?auto=format&fit=crop&w=800&q=80" alt="森呼吸農場 - 寵物跑跑" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
-                    <div class="hover-heart-overlay absolute inset-0 flex flex-col items-center justify-center text-white">
-                        <i class="fa-solid fa-heart text-4xl mb-2 text-brand-orange"></i>
-                        <p class="font-bold text-lg">森呼吸農場</p>
-                    </div>
-                </div>
-
-                <!-- Item 6 (Call to Action) -->
-                <div class="group relative aspect-square bg-brand-navy overflow-hidden rounded-xl md:rounded-2xl shadow-sm cursor-pointer flex items-center justify-center">
-                    <div class="text-center p-6">
-                        <h3 class="text-xl md:text-2xl font-bold text-white mb-2">更多推薦</h3>
-                        <p class="text-white/80 mb-4 text-sm md:text-base">都在我們的 Instagram</p>
-                        <a href="https://www.instagram.com/petgo.tw/" class="inline-block px-6 py-2 bg-white text-brand-navy rounded-full font-bold hover:bg-brand-orange hover:text-white transition">GO!</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 熱門主題 (Trending Now Integrated) -->
-            <div class="mt-16">
-                <h3 class="text-xl md:text-2xl font-bold text-brand-navy mb-8 flex items-center">
-                    <i class="fa-solid fa-fire text-red-500 mr-3"></i> 本週熱門話題
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- Trending 1 -->
-                    <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition border border-gray-100">
-                        <div class="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-xl mb-4">
-                            <i class="fa-solid fa-wine-glass"></i>
-                        </div>
-                        <h4 class="font-bold text-lg md:text-xl text-brand-navy mb-2">台北唯一！邊牧鮮花餐酒館</h4>
-                        <p class="text-gray-600 text-sm mb-3">7.4 萬次觀看！沈浸在鮮花與邊境牧羊犬的浪漫晚餐體驗。</p>
-                        <div class="text-xs text-brand-orange font-medium space-x-2">
-                            <span>#台北美食</span> <span>#寵物友善</span>
-                        </div>
-                    </div>
-
-                    <!-- Trending 2 -->
-                    <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition border border-gray-100">
-                        <div class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center text-xl mb-4">
-                            <i class="fa-solid fa-utensils"></i>
-                        </div>
-                        <h4 class="font-bold text-lg md:text-xl text-brand-navy mb-2">台北超甜！哈士奇早餐店</h4>
-                        <p class="text-gray-600 text-sm mb-3">喜旺早餐公司，看二哈店長如何用眼神「熱情」招呼客人。</p>
-                        <div class="text-xs text-brand-orange font-medium space-x-2">
-                            <span>#早午餐</span> <span>#哈士奇</span>
-                        </div>
-                    </div>
-
-                    <!-- Trending 3 -->
-                    <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition border border-gray-100">
-                        <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xl mb-4">
-                            <i class="fa-solid fa-leaf"></i>
-                        </div>
-                        <h4 class="font-bold text-lg md:text-xl text-brand-navy mb-2">台北唯一！柯基花藝店</h4>
-                        <p class="text-gray-600 text-sm mb-3">玫瑰屋花藝植坊，被花草與短腿柯基包圍的療癒午後。</p>
-                        <div class="text-xs text-brand-orange font-medium space-x-2">
-                            <span>#花店</span> <span>#柯基</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 合作服務 Work With Us -->
-    <section id="services" class="py-16 md:py-20 bg-white relative z-10">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6">
-            <div class="text-center mb-12">
-                <span class="text-brand-orange font-bold tracking-wider uppercase">Business</span>
-                <h2 class="text-2xl md:text-4xl font-bold text-brand-navy mt-2">讓流量變現，讓顧客愛上你的品牌</h2>
-            </div>
-            
-            <div class="bg-blue-50 rounded-3xl p-6 md:p-12 shadow-inner border border-blue-100">
-                <div class="prose max-w-none text-gray-700">
-                    <p class="mb-6 text-base md:text-lg leading-relaxed font-medium">
-                        在 PetGo，我們深知餐廳老闆與品牌主的痛點：有好的空間與產品，卻接觸不到精準的飼主客群。我們提供的不是單純的「廣告」，而是具有情感連結的「內容行銷」。
-                    </p>
+                <!-- 圖片區域 -->
+                <div class="flex-1 bg-slate-50 relative overflow-auto flex items-center justify-center p-4">
+                    <!-- 這是主要的圖片 -->
+                    <img id="main-chart" 
+                         src="" 
+                         alt="Chart" 
+                         class="max-w-full max-h-full object-contain shadow-sm rounded border border-slate-200 fade-in transition-transform duration-300"
+                    >
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mt-8">
-                        <div class="flex gap-4">
-                            <div class="flex-shrink-0 w-10 h-10 bg-brand-navy text-white rounded-full flex items-center justify-center">
-                                <i class="fa-solid fa-video"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-brand-navy text-lg">沉浸式短影音開箱</h4>
-                                <p class="text-sm mt-1">高質感 Reels 真實呈現環境與餐點。我們曾創下單支影片 7.4 萬次觀看的紀錄。</p>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-4">
-                            <div class="flex-shrink-0 w-10 h-10 bg-brand-navy text-white rounded-full flex items-center justify-center">
-                                <i class="fa-solid fa-bullseye"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-brand-navy text-lg">精準社群曝光</h4>
-                                <p class="text-sm mt-1">直接對接 1.6 萬名高黏著度飼主。我們的粉絲都是「週末一定要帶毛孩出門」的行動派。</p>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-4">
-                            <div class="flex-shrink-0 w-10 h-10 bg-brand-navy text-white rounded-full flex items-center justify-center">
-                                <i class="fa-solid fa-star"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-brand-navy text-lg">店狗/店貓 IP 營造</h4>
-                                <p class="text-sm mt-1">您的店狗太可愛卻沒人知道？我們用鏡頭語言打造「明星店長」，創造粉絲拉力。</p>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-4">
-                            <div class="flex-shrink-0 w-10 h-10 bg-brand-navy text-white rounded-full flex items-center justify-center">
-                                <i class="fa-solid fa-handshake"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-brand-navy text-lg">寵物友善顧問</h4>
-                                <p class="text-sm mt-1">提供專業的飼主視角環境優化建議，減少客訴，大幅提升顧客回訪率。</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 聯絡我們 Contact (iOS Style) -->
-    <section id="contact" class="py-20 md:py-24 bg-brand-navy relative overflow-hidden">
-        <!-- 背景裝飾 -->
-        <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-            <i class="fa-solid fa-paw absolute top-10 left-10 text-9xl text-white transform -rotate-12"></i>
-            <i class="fa-solid fa-comment-dots absolute bottom-10 right-10 text-9xl text-white transform rotate-12"></i>
-        </div>
-
-        <div class="max-w-3xl mx-auto px-4 relative z-10 text-center">
-            
-            <!-- iOS Notification Style Box -->
-            <div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-8 md:p-12 shadow-2xl transform transition hover:scale-105 duration-300">
-                <div class="flex items-center justify-center mb-6">
-                    <div class="bg-brand-orange w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg">
-                        <i class="fa-solid fa-envelope text-3xl text-white"></i>
+                    <!-- 載入中提示 (隱藏) -->
+                    <div id="loading-indicator" class="hidden absolute inset-0 bg-white/80 flex items-center justify-center z-10">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
                     </div>
                 </div>
                 
-                <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">有合作想法嗎？</h2>
-                <p class="text-blue-200 mb-8 text-lg">就像朋友傳訊息一樣簡單，期待收到您的來信！</p>
-                
-                <a href="mailto:petgo20241219@gmail.com" class="btn-gradient inline-flex items-center justify-center w-full md:w-auto px-8 py-4 rounded-xl bg-white text-brand-navy font-bold text-xl transition-all duration-300 relative group">
-                    <span>Send Message @PetGo.tw</span>
-                    <i class="fa-regular fa-paper-plane ml-3"></i>
-                    
-                    <!-- Tooltip -->
-                    <span class="tooltip-text absolute -top-12 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-3 rounded whitespace-nowrap hidden md:block">
-                        立即討論合作！
-                        <svg class="absolute text-black h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
-                    </span>
-                </a>
-
-                <!-- Social Cards -->
-                <div class="mt-12 flex flex-col md:flex-row justify-center gap-6">
-                    <a href="https://www.instagram.com/petgo.tw/" class="flex items-center p-4 bg-white/5 rounded-xl hover:bg-white/20 transition border border-white/10">
-                        <i class="fa-brands fa-instagram text-3xl text-pink-400 mr-4"></i>
-                        <div class="text-left">
-                            <div class="text-white font-bold">Instagram</div>
-                            <div class="text-blue-200 text-sm">@PetGo.tw</div>
-                        </div>
-                    </a>
-                    
-                    <a href="mailto:petgo20241219@gmail.com" class="flex items-center p-4 bg-white/5 rounded-xl hover:bg-white/20 transition border border-white/10">
-                        <i class="fa-solid fa-envelope text-3xl text-brand-orange mr-4"></i>
-                        <div class="text-left">
-                            <div class="text-white font-bold">Email</div>
-                            <div class="text-blue-200 text-sm">petgo20241219...</div>
-                        </div>
-                    </a>
+                <!-- 底部備註 -->
+                <div class="bg-slate-50 px-6 py-2 border-t border-slate-200 text-xs text-slate-400 flex justify-between">
+                    <span>Source: ERP System / Excel Export</span>
+                    <span>Last Updated: Today</span>
                 </div>
             </div>
-
-            <footer class="mt-12 text-blue-300 text-sm">
-                <p>&copy; 2025 PetGo. All rights reserved.</p>
-                <p class="mt-2">Made with <i class="fa-solid fa-heart text-red-500 animate-pulse"></i> for Pets</p>
-            </footer>
         </div>
-    </section>
+    </main>
 
-    <!-- JavaScript Scripts -->
+    <!-- JavaScript 邏輯 -->
     <script>
-        // 1. 打字機特效
-        const textElement = document.getElementById('typewriter-text');
-        const phrases = [
-            "發掘各地寵物友善店家...",
-            "全台最可愛的小店長都在這...",
-            "週末帶毛孩去哪玩？"
+        // ==========================================
+        // 1. 資料設定區 (請在此處替換您的圖片路徑)
+        // ==========================================
+        const chartData = [
+            {
+                id: 'cat-1',
+                title: '1. 毛利分析',
+                icon: 'trending-up',
+                items: [
+                    { 
+                        id: '1-1', 
+                        name: '1.1 單月毛利', 
+                        // 替換下面的 URL 為您的本地圖片路徑，例如: './images/monthly_profit.png'
+                        image: 'https://placehold.co/1000x600/f1f5f9/334155?text=1.1+Monthly+Gross+Margin' 
+                    },
+                    { 
+                        id: '1-2', 
+                        name: '1.2 累計毛利', 
+                        image: 'https://placehold.co/1000x600/f1f5f9/334155?text=1.2+Cumulative+Gross+Margin' 
+                    },
+                    { 
+                        id: '1-3', 
+                        name: '1.3 螺絲釘', 
+                        image: 'https://placehold.co/1000x600/f1f5f9/334155?text=1.3+Screws' 
+                    }
+                ]
+            },
+            {
+                id: 'cat-2',
+                title: '2. 製造不良率',
+                icon: 'alert-circle',
+                items: [
+                    { id: '2-1', name: '2.1 A產品', image: 'https://placehold.co/1000x600/fff7ed/9a3412?text=2.1+Product+A+Defect+Rate' },
+                    { id: '2-2', name: '2.2 B產品', image: 'https://placehold.co/1000x600/fff7ed/9a3412?text=2.2+Product+B+Defect+Rate' },
+                    { id: '2-3', name: '2.3 C產品', image: 'https://placehold.co/1000x600/fff7ed/9a3412?text=2.3+Product+C+Defect+Rate' },
+                    { id: '2-4', name: '2.4 D產品', image: 'https://placehold.co/1000x600/fff7ed/9a3412?text=2.4+Product+D+Defect+Rate' },
+                    { id: '2-5', name: '2.5 E產品', image: 'https://placehold.co/1000x600/fff7ed/9a3412?text=2.5+Product+E+Defect+Rate' }
+                ]
+            }
         ];
-        let phraseIndex = 0;
-        let charIndex = 0;
-        let isDeleting = false;
-        let typeSpeed = 100;
 
-        function typeWriter() {
-            const currentPhrase = phrases[phraseIndex];
+        // ==========================================
+        // 2. 應用程式邏輯
+        // ==========================================
+        
+        const menuContainer = document.getElementById('sidebar-menu');
+        const mainImage = document.getElementById('main-chart');
+        const chartTitle = document.getElementById('chart-title').querySelector('span');
+        const breadcrumbCat = document.getElementById('breadcrumb-category');
+        const breadcrumbItem = document.getElementById('breadcrumb-item');
+        const loadingIndicator = document.getElementById('loading-indicator');
+
+        // 初始化
+        function init() {
+            renderMenu();
+            updateDate();
+            lucide.createIcons();
             
-            if (isDeleting) {
-                textElement.textContent = currentPhrase.substring(0, charIndex - 1);
-                charIndex--;
-                typeSpeed = 50;
+            // 預設載入第一個分類的第一個項目
+            const firstGroup = chartData[0];
+            const firstItem = firstGroup.items[0];
+            loadChart(firstItem.image, firstItem.name, firstGroup.title, firstItem.id);
+            
+            // 預設展開第一個選單
+            toggleGroup(firstGroup.id);
+        }
+
+        // 渲染選單
+        function renderMenu() {
+            let html = '';
+            
+            chartData.forEach(category => {
+                html += `
+                    <div class="mb-1">
+                        <!-- 主分類按鈕 -->
+                        <button onclick="toggleGroup('${category.id}')" 
+                                class="w-full flex items-center justify-between px-6 py-3 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="${category.icon}" class="w-4 h-4 text-slate-400 group-hover:text-blue-400"></i>
+                                <span class="font-medium tracking-wide">${category.title}</span>
+                            </div>
+                            <i id="icon-${category.id}" data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300"></i>
+                        </button>
+                        
+                        <!-- 子項目列表 (預設隱藏) -->
+                        <div id="group-${category.id}" class="hidden bg-corp-800 overflow-hidden transition-all">
+                            <ul class="py-1">
+                                ${category.items.map(item => `
+                                    <li>
+                                        <button id="btn-${item.id}" 
+                                                onclick="loadChart('${item.image}', '${item.name}', '${category.title}', '${item.id}')"
+                                                class="w-full text-left pl-14 pr-6 py-2.5 text-sm text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors border-l-4 border-transparent flex items-center justify-between group-sub">
+                                            <span>${item.name}</span>
+                                            <i data-lucide="arrow-right" class="w-3 h-3 opacity-0 group-sub-hover:opacity-100 transition-opacity text-blue-400"></i>
+                                        </button>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            menuContainer.innerHTML = html;
+        }
+
+        // 切換主分類展開/收合
+        function toggleGroup(id) {
+            const content = document.getElementById(`group-${id}`);
+            const icon = document.getElementById(`icon-${id}`);
+            
+            // 簡單的 Toggle 邏輯
+            if (content.classList.contains('hidden')) {
+                // 關閉其他已展開的 (可選)
+                // document.querySelectorAll('[id^="group-"]').forEach(el => el.classList.add('hidden'));
+                // document.querySelectorAll('[id^="icon-"]').forEach(el => el.style.transform = 'rotate(0deg)');
+
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
             } else {
-                textElement.textContent = currentPhrase.substring(0, charIndex + 1);
-                charIndex++;
-                typeSpeed = 100;
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
             }
-
-            if (!isDeleting && charIndex === currentPhrase.length) {
-                isDeleting = true;
-                typeSpeed = 2000; // 停頓久一點
-            } else if (isDeleting && charIndex === 0) {
-                isDeleting = false;
-                phraseIndex = (phraseIndex + 1) % phrases.length;
-                typeSpeed = 500;
-            }
-
-            setTimeout(typeWriter, typeSpeed);
         }
 
-        // 2. 腳印拖尾特效 (Paw Print Trail)
-        // 手機版優化：減少腳印數量，避免遮擋內容
-        let lastPawTime = 0;
-        const isMobile = window.innerWidth < 768;
-        const pawInterval = isMobile ? 200 : 100; // 手機版間隔久一點
-
-        document.addEventListener('mousemove', (e) => {
-            const now = Date.now();
-            if (now - lastPawTime > pawInterval) {
-                createPaw(e.clientX, e.clientY);
-                lastPawTime = now;
-            }
-        });
-
-        // 增加 Touch 事件支援 (手機滑動時也有腳印)
-        document.addEventListener('touchmove', (e) => {
-            const now = Date.now();
-            if (now - lastPawTime > pawInterval) {
-                const touch = e.touches[0];
-                createPaw(touch.clientX, touch.clientY);
-                lastPawTime = now;
-            }
-        });
-
-        function createPaw(x, y) {
-            const paw = document.createElement('div');
-            paw.classList.add('paw-print');
-            paw.style.left = `${x}px`;
-            paw.style.top = `${y}px`;
+        // 載入圖片與更新 UI 狀態
+        function loadChart(imageUrl, title, categoryTitle, itemId) {
+            // 1. 更新按鈕高亮狀態
+            // 清除所有高亮
+            document.querySelectorAll('button[id^="btn-"]').forEach(btn => {
+                btn.classList.remove('bg-blue-900', 'text-white', 'border-blue-500', 'bg-opacity-30');
+                btn.classList.add('border-transparent');
+            });
             
-            const rotation = Math.random() * 60 - 30; 
-            paw.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
-            
-            document.body.appendChild(paw);
+            // 設定當前高亮
+            const activeBtn = document.getElementById(`btn-${itemId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('border-transparent');
+                activeBtn.classList.add('bg-blue-900', 'bg-opacity-50', 'text-white', 'border-blue-500');
+            }
 
+            // 2. 更新文字資訊
+            chartTitle.textContent = title;
+            breadcrumbCat.textContent = categoryTitle;
+            breadcrumbItem.textContent = title;
+
+            // 3. 圖片載入動畫與切換
+            loadingIndicator.classList.remove('hidden');
+            mainImage.classList.remove('fade-in'); // 重置動畫
+            mainImage.style.opacity = '0';
+
+            // 模擬載入延遲 (讓過渡更自然，實際使用時可移除 setTimeout)
             setTimeout(() => {
-                paw.remove();
-            }, 1000);
+                mainImage.src = imageUrl;
+                
+                mainImage.onload = () => {
+                    loadingIndicator.classList.add('hidden');
+                    mainImage.style.opacity = '1';
+                    mainImage.classList.add('fade-in');
+                };
+
+                // 處理圖片載入失敗的情況
+                mainImage.onerror = () => {
+                    loadingIndicator.classList.add('hidden');
+                    mainImage.src = 'https://placehold.co/800x400?text=Image+Not+Found';
+                    mainImage.style.opacity = '1';
+                }
+            }, 100);
         }
 
-        // 3. 背景氣泡生成
-        function createBubbles() {
-            const container = document.getElementById('bubbles-container');
-            const bubbleCount = 15;
-
-            for (let i = 0; i < bubbleCount; i++) {
-                const bubble = document.createElement('div');
-                bubble.classList.add('bubble');
-                
-                const size = Math.random() * 60 + 20 + 'px';
-                bubble.style.width = size;
-                bubble.style.height = size;
-                bubble.style.left = Math.random() * 100 + '%';
-                bubble.style.animationDuration = Math.random() * 10 + 10 + 's';
-                bubble.style.animationDelay = Math.random() * 10 + 's';
-                
-                container.appendChild(bubble);
+        // 顯示當前日期
+        function updateDate() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' });
+            document.getElementById('current-date').textContent = dateStr;
+        }
+        
+        // 全螢幕切換
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            typeWriter();
-            createBubbles();
-        });
+        // 啟動
+        init();
+
     </script>
 </body>
 </html>
