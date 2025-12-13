@@ -3,12 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>財務績效視覺化儀表板</title>
-    <!-- Tailwind CSS (CDN) -->
+    <title>生產品質互動儀表板</title>
+    
+    <!-- 1. Tailwind CSS (樣式框架) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons (圖標庫) -->
+    
+    <!-- 2. Lucide Icons (圖標庫) -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
+    <!-- 3. Chart.js (圖表核心庫) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <!-- 自定義配置 -->
     <script>
         tailwind.config = {
@@ -19,7 +24,7 @@
                             900: '#0f172a', // Sidebar bg
                             800: '#1e293b', // Sidebar item bg
                             700: '#334155', // Hover
-                            600: '#2563eb', // Active Highlight (Blue)
+                            600: '#2563eb', // Active Highlight
                             50: '#f8fafc',  // Main bg
                         }
                     },
@@ -31,320 +36,397 @@
         }
     </script>
     <style>
-        /* 簡單的淡入動畫 */
-        .fade-in {
-            animation: fadeIn 0.4s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0.5; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        /* 隱藏滾動條但保持功能 */
+        .no-scrollbar::-webkit-scrollbar { width: 8px; }
+        .no-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+        .no-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
         
-        /* 隱藏滾動條但保持功能 (Optional) */
-        .no-scrollbar::-webkit-scrollbar {
-            width: 8px;
-        }
-        .no-scrollbar::-webkit-scrollbar-track {
-            background: #1e293b;
-        }
-        .no-scrollbar::-webkit-scrollbar-thumb {
-            background: #475569;
-            border-radius: 4px;
+        /* 數據卡片淡入動畫 */
+        .fade-in-up { animation: fadeInUp 0.3s ease-out forwards; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body class="bg-corp-50 text-slate-800 h-screen overflow-hidden flex font-sans">
 
-    <!-- 左側導航欄 (Sidebar) - 佔寬 25% (在大螢幕上固定寬度較佳，此處設為 w-72 約 280px) -->
-    <aside class="w-72 bg-corp-900 text-slate-300 flex flex-col shadow-2xl z-20 transition-all duration-300">
-        
-        <!-- Logo / 標題區 -->
-        <div class="p-6 border-b border-slate-700 bg-corp-900 z-10">
+    <!-- 左側導航欄 (Sidebar) -->
+    <aside class="w-72 bg-corp-900 text-slate-300 flex flex-col shadow-2xl z-20 shrink-0">
+        <!-- Logo -->
+        <div class="p-6 border-b border-slate-700 bg-corp-900">
             <div class="flex items-center gap-3">
                 <div class="bg-blue-600 p-2 rounded-lg text-white">
                     <i data-lucide="bar-chart-2" class="w-6 h-6"></i>
                 </div>
                 <div>
-                    <h1 class="text-white font-bold text-lg tracking-wide">財務戰情室</h1>
-                    <p class="text-xs text-slate-400">Financial Dashboard</p>
+                    <h1 class="text-white font-bold text-lg tracking-wide">生產戰情室</h1>
+                    <p class="text-xs text-slate-400">Production Dashboard</p>
                 </div>
             </div>
         </div>
 
-        <!-- 選單區 -->
+        <!-- Menu -->
         <nav class="flex-1 overflow-y-auto no-scrollbar py-4" id="sidebar-menu">
-            <!-- 選單內容將由 JavaScript 動態生成 -->
-        </nav>
-
-        <!-- 底部使用者資訊 -->
-        <div class="p-4 border-t border-slate-700 bg-corp-900">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-slate-600 flex items-center justify-center text-white text-xs font-bold">
-                    FM
-                </div>
-                <div>
-                    <p class="text-sm text-white">財務經理</p>
-                    <p class="text-xs text-slate-500">View Only Mode</p>
-                </div>
-            </div>
-        </div>
-    </aside>
-
-    <!-- 右側展示區 (Main Content) - 佔據剩餘空間 -->
-    <main class="flex-1 flex flex-col h-screen relative">
-        
-        <!-- 頂部資訊列 (Header) -->
-        <header class="bg-white h-16 shadow-sm border-b border-slate-200 flex items-center justify-between px-8 z-10">
-            <div>
-                <!-- 麵包屑導航 -->
-                <nav class="flex items-center text-sm text-slate-500">
-                    <span class="hover:text-blue-600 cursor-pointer">首頁</span>
-                    <i data-lucide="chevron-right" class="w-4 h-4 mx-2"></i>
-                    <span id="breadcrumb-category" class="font-medium text-slate-700">類別</span>
-                    <i data-lucide="chevron-right" class="w-4 h-4 mx-2"></i>
-                    <span id="breadcrumb-item" class="font-bold text-blue-700">項目</span>
-                </nav>
-            </div>
-            <div class="flex items-center gap-4">
-                <span id="current-date" class="text-sm text-slate-500 font-mono"></span>
-                <button onclick="toggleFullScreen()" class="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="全螢幕">
-                    <i data-lucide="expand" class="w-5 h-5"></i>
+            <!-- 1. 毛利分析 (Placeholder) -->
+            <div class="mb-1">
+                <button class="w-full flex items-center justify-between px-6 py-3 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="trending-up" class="w-4 h-4"></i>
+                        <span class="font-medium tracking-wide">1. 毛利分析</span>
+                    </div>
                 </button>
             </div>
+
+            <!-- 2. 製造不良率 (Active Group) -->
+            <div class="mb-1">
+                <button onclick="toggleGroup('defects')" 
+                        class="w-full flex items-center justify-between px-6 py-3 text-white bg-slate-800 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="alert-circle" class="w-4 h-4 text-blue-400"></i>
+                        <span class="font-medium tracking-wide">2. 製造不良率</span>
+                    </div>
+                    <i id="icon-defects" data-lucide="chevron-down" class="w-4 h-4 transform rotate-180 transition-transform"></i>
+                </button>
+                
+                <div id="group-defects" class="bg-corp-800 overflow-hidden transition-all">
+                    <ul class="py-1">
+                        <li><button onclick="updateChart('A')" class="menu-item w-full text-left pl-14 pr-6 py-2.5 text-sm hover:text-white hover:bg-slate-700/50 transition-colors border-l-4 border-transparent active-menu" data-id="A">2.1 A產品</button></li>
+                        <li><button onclick="updateChart('B')" class="menu-item w-full text-left pl-14 pr-6 py-2.5 text-sm text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors border-l-4 border-transparent" data-id="B">2.2 B產品</button></li>
+                        <li><button onclick="updateChart('C')" class="menu-item w-full text-left pl-14 pr-6 py-2.5 text-sm text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors border-l-4 border-transparent" data-id="C">2.3 C產品</button></li>
+                        <li><button onclick="updateChart('D')" class="menu-item w-full text-left pl-14 pr-6 py-2.5 text-sm text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors border-l-4 border-transparent" data-id="D">2.4 D(23)產品</button></li>
+                        <li><button onclick="updateChart('E')" class="menu-item w-full text-left pl-14 pr-6 py-2.5 text-sm text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors border-l-4 border-transparent" data-id="E">2.5 E產品</button></li>
+                        <li class="border-t border-slate-700/50 mt-1 pt-1"><button onclick="updateChart('ALL')" class="menu-item w-full text-left pl-14 pr-6 py-2.5 text-sm text-blue-300 hover:text-white hover:bg-slate-700/50 transition-colors border-l-4 border-transparent" data-id="ALL">2.6 總覽 (Overview)</button></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- 右側內容區 -->
+    <main class="flex-1 flex flex-col h-screen relative bg-slate-50">
+        <!-- Header -->
+        <header class="bg-white h-16 shadow-sm border-b border-slate-200 flex items-center justify-between px-8 z-10 shrink-0">
+            <nav class="flex items-center text-sm text-slate-500">
+                <span>製造部</span>
+                <i data-lucide="chevron-right" class="w-4 h-4 mx-2"></i>
+                <span class="font-medium text-slate-700">品質監控</span>
+                <i data-lucide="chevron-right" class="w-4 h-4 mx-2"></i>
+                <span id="header-title" class="font-bold text-blue-700">A產品 不良率分析</span>
+            </nav>
+            <div class="text-xs font-mono text-slate-400 bg-slate-100 px-3 py-1 rounded">Data Updated: 2025/12/13</div>
         </header>
 
-        <!-- 圖片展示容器 -->
-        <div class="flex-1 p-6 bg-slate-100 overflow-hidden flex flex-col">
-            <!-- 圖片卡片 -->
-            <div class="bg-white rounded-xl shadow-lg border border-slate-200 flex-1 flex flex-col overflow-hidden relative group">
-                
-                <!-- 標題列 -->
-                <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
-                    <h2 id="chart-title" class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                        <i data-lucide="pie-chart" class="w-5 h-5 text-blue-600"></i>
-                        <span>載入中...</span>
-                    </h2>
-                    <div class="flex gap-2">
-                         <span class="text-xs font-semibold px-2 py-1 bg-blue-50 text-blue-700 rounded border border-blue-100">Live Data</span>
+        <!-- Content -->
+        <div class="flex-1 p-6 overflow-hidden flex flex-col gap-4">
+            
+            <!-- 數據詳情卡片 (點擊圖表後顯示) -->
+            <div id="info-card" class="hidden bg-white rounded-lg shadow border-l-4 border-blue-600 p-4 flex items-center justify-between h-20 shrink-0">
+                <div class="flex items-center gap-6">
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">選取月份</p>
+                        <p id="card-month" class="text-xl font-bold text-slate-800">2025/01</p>
+                    </div>
+                    <div class="w-px h-10 bg-slate-200"></div>
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">生產台數</p>
+                        <p id="card-production" class="text-xl font-bold text-blue-700">0</p>
+                    </div>
+                    <div class="w-px h-10 bg-slate-200"></div>
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">不良率</p>
+                        <p id="card-rate" class="text-xl font-bold text-red-600">0%</p>
                     </div>
                 </div>
+                <div class="text-sm text-slate-400 italic">
+                    <button onclick="resetHighlight()" class="text-xs px-3 py-1 border border-slate-300 rounded hover:bg-slate-100 transition">清除選取</button>
+                </div>
+            </div>
 
-                <!-- 圖片區域 -->
-                <div class="flex-1 bg-slate-50 relative overflow-auto flex items-center justify-center p-4">
-                    <!-- 這是主要的圖片 -->
-                    <img id="main-chart" 
-                         src="" 
-                         alt="Chart" 
-                         class="max-w-full max-h-full object-contain shadow-sm rounded border border-slate-200 fade-in transition-transform duration-300"
-                    >
-                    
-                    <!-- 載入中提示 (隱藏) -->
-                    <div id="loading-indicator" class="hidden absolute inset-0 bg-white/80 flex items-center justify-center z-10">
-                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                    </div>
-                </div>
-                
-                <!-- 底部備註 -->
-                <div class="bg-slate-50 px-6 py-2 border-t border-slate-200 text-xs text-slate-400 flex justify-between">
-                    <span>Source: ERP System / Excel Export</span>
-                    <span>Last Updated: Today</span>
-                </div>
+            <!-- 圖表容器 -->
+            <div class="bg-white rounded-xl shadow-lg border border-slate-200 flex-1 p-4 relative min-h-0">
+                <canvas id="productionChart"></canvas>
             </div>
         </div>
     </main>
 
-    <!-- JavaScript 邏輯 -->
     <script>
         // ==========================================
-        // 1. 資料設定區 (請在此處替換您的圖片路徑)
+        // 1. Raw Data (真實數據源)
         // ==========================================
-        const chartData = [
-            {
-                id: 'cat-1',
-                title: '1. 毛利分析',
-                icon: 'trending-up',
-                items: [
-                    { 
-                        id: '1-1', 
-                        name: '1.1 單月毛利', 
-                        // 替換下面的 URL 為您的本地圖片路徑，例如: './images/monthly_profit.png'
-                        image: 'https://placehold.co/1000x600/f1f5f9/334155?text=1.1+Monthly+Gross+Margin' 
-                    },
-                    { 
-                        id: '1-2', 
-                        name: '1.2 累計毛利', 
-                        image: 'https://placehold.co/1000x600/f1f5f9/334155?text=1.2+Cumulative+Gross+Margin' 
-                    },
-                    { 
-                        id: '1-3', 
-                        name: '1.3 螺絲釘', 
-                        image: 'https://placehold.co/1000x600/f1f5f9/334155?text=1.3+Screws' 
-                    }
-                ]
-            },
-            {
-                id: 'cat-2',
-                title: '2. 製造不良率',
-                icon: 'alert-circle',
-                items: [
-                    { id: '2-1', name: '2.1 A產品', image: 'https://placehold.co/1000x600/fff7ed/9a3412?text=2.1+Product+A+Defect+Rate' },
-                    { id: '2-2', name: '2.2 B產品', image: 'https://placehold.co/1000x600/fff7ed/9a3412?text=2.2+Product+B+Defect+Rate' },
-                    { id: '2-3', name: '2.3 C產品', image: 'https://placehold.co/1000x600/fff7ed/9a3412?text=2.3+Product+C+Defect+Rate' },
-                    { id: '2-4', name: '2.4 D產品', image: 'https://placehold.co/1000x600/fff7ed/9a3412?text=2.4+Product+D+Defect+Rate' },
-                    { id: '2-5', name: '2.5 E產品', image: 'https://placehold.co/1000x600/fff7ed/9a3412?text=2.5+Product+E+Defect+Rate' }
-                ]
+        const rawData = {
+            labels: ["2025/01", "2025/02", "2025/03", "2025/04", "2025/05", "2025/06", "2025/07", "2025/08", "2025/09", "2025/10", "2025/11", "2025/11_WIP"],
+            production: [10, 43, 35, 31, 78, 10, 37, 68, 11, 12, 34, 61],
+            products: {
+                'A': { name: 'A產品', data: [1.20, 0.30, 0.34, 0.81, 0.22, 3.20, 1.19, 0.65, 1.00, 1.92, 1.29, 0.02], color: '#ef4444' }, // Red
+                'B': { name: 'B產品', data: [3.20, 0.30, 0.94, null, 0.69, 2.30, 0.62, 0.63, 2.91, 1.83, 0.35, 0.05], color: '#f59e0b' }, // Amber
+                'C': { name: 'C產品', data: [4.30, 0.02, 0.03, 0.10, 0.01, 0.20, 0.00, 0.03, 0.18, 0.08, 0.09, 0.02], color: '#10b981' }, // Emerald
+                'D': { name: 'D(23)產品', data: [3.10, 0.16, 0.17, 0.42, 0.17, 2.00, 1.49, 0.84, 5.36, 4.00, 1.85, 0.39], color: '#8b5cf6' }, // Violet
+                'E': { name: 'E產品', data: [3.20, 0.21, 0.60, 0.45, 0.19, 1.50, 0.38, 0.09, 1.45, 1.42, 0.53, 0.11], color: '#ec4899' }  // Pink
             }
-        ];
+        };
 
         // ==========================================
-        // 2. 應用程式邏輯
+        // 2. Chart.js 初始化與配置
         // ==========================================
-        
-        const menuContainer = document.getElementById('sidebar-menu');
-        const mainImage = document.getElementById('main-chart');
-        const chartTitle = document.getElementById('chart-title').querySelector('span');
-        const breadcrumbCat = document.getElementById('breadcrumb-category');
-        const breadcrumbItem = document.getElementById('breadcrumb-item');
-        const loadingIndicator = document.getElementById('loading-indicator');
+        let chartInstance = null;
+        let activeIndex = -1; // 用於追蹤當前被點擊的柱子索引 (-1 表示無)
+        let currentMode = 'A'; // 當前選中的產品 ID
 
-        // 初始化
-        function init() {
-            renderMenu();
-            updateDate();
-            lucide.createIcons();
+        function initChart() {
+            const ctx = document.getElementById('productionChart').getContext('2d');
             
-            // 預設載入第一個分類的第一個項目
-            const firstGroup = chartData[0];
-            const firstItem = firstGroup.items[0];
-            loadChart(firstItem.image, firstItem.name, firstGroup.title, firstItem.id);
-            
-            // 預設展開第一個選單
-            toggleGroup(firstGroup.id);
-        }
-
-        // 渲染選單
-        function renderMenu() {
-            let html = '';
-            
-            chartData.forEach(category => {
-                html += `
-                    <div class="mb-1">
-                        <!-- 主分類按鈕 -->
-                        <button onclick="toggleGroup('${category.id}')" 
-                                class="w-full flex items-center justify-between px-6 py-3 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group">
-                            <div class="flex items-center gap-3">
-                                <i data-lucide="${category.icon}" class="w-4 h-4 text-slate-400 group-hover:text-blue-400"></i>
-                                <span class="font-medium tracking-wide">${category.title}</span>
-                            </div>
-                            <i id="icon-${category.id}" data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300"></i>
-                        </button>
+            chartInstance = new Chart(ctx, {
+                type: 'bar', // 預設類型，datasets 內可以覆蓋
+                data: {
+                    labels: rawData.labels,
+                    datasets: [] // 初始為空，由 updateChart 填充
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    // 點擊事件處理
+                    onClick: (e, elements, chart) => {
+                        // 取得點擊位置對應的數據索引 (使用 nearest 模式以利於點擊體驗)
+                        const points = chart.getElementsAtEventForMode(e, 'index', { intersect: false }, true);
                         
-                        <!-- 子項目列表 (預設隱藏) -->
-                        <div id="group-${category.id}" class="hidden bg-corp-800 overflow-hidden transition-all">
-                            <ul class="py-1">
-                                ${category.items.map(item => `
-                                    <li>
-                                        <button id="btn-${item.id}" 
-                                                onclick="loadChart('${item.image}', '${item.name}', '${category.title}', '${item.id}')"
-                                                class="w-full text-left pl-14 pr-6 py-2.5 text-sm text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors border-l-4 border-transparent flex items-center justify-between group-sub">
-                                            <span>${item.name}</span>
-                                            <i data-lucide="arrow-right" class="w-3 h-3 opacity-0 group-sub-hover:opacity-100 transition-opacity text-blue-400"></i>
-                                        </button>
-                                    </li>
-                                `).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                `;
+                        if (points.length) {
+                            const index = points[0].index;
+                            
+                            // 如果點擊的是同一個，則取消選取；否則選取新的
+                            if (activeIndex === index) {
+                                activeIndex = -1;
+                                hideInfoCard();
+                            } else {
+                                activeIndex = index;
+                                showInfoCard(index);
+                            }
+                        } else {
+                            // 點擊空白處，取消選取
+                            activeIndex = -1;
+                            hideInfoCard();
+                        }
+                        chart.update(); // 觸發重繪以更新顏色
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            align: 'end',
+                            labels: { usePointStyle: true, font: { family: "'Inter', sans-serif" } }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleFont: { size: 13 },
+                            bodyFont: { size: 13 },
+                            padding: 10,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.dataset.type === 'line') {
+                                        return label + context.raw + '%';
+                                    }
+                                    return label + context.raw + ' 台';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 11 } }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: '生產台數 (Bar)', color: '#3b82f6', font: { weight: 'bold' } },
+                            grid: { borderDash: [2, 2], color: '#e2e8f0' },
+                            beginAtZero: true
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: '不良率 % (Line)', color: '#ef4444', font: { weight: 'bold' } },
+                            grid: { drawOnChartArea: false }, // 右軸不畫網格線
+                            ticks: {
+                                callback: function(value) { return value + "%" }
+                            },
+                            suggestedMax: 6, // 讓折線圖不要頂到天花板
+                            beginAtZero: true
+                        }
+                    }
+                }
             });
-            
-            menuContainer.innerHTML = html;
         }
 
-        // 切換主分類展開/收合
-        function toggleGroup(id) {
-            const content = document.getElementById(`group-${id}`);
-            const icon = document.getElementById(`icon-${id}`);
-            
-            // 簡單的 Toggle 邏輯
-            if (content.classList.contains('hidden')) {
-                // 關閉其他已展開的 (可選)
-                // document.querySelectorAll('[id^="group-"]').forEach(el => el.classList.add('hidden'));
-                // document.querySelectorAll('[id^="icon-"]').forEach(el => el.style.transform = 'rotate(0deg)');
+        // ==========================================
+        // 3. 邏輯控制函數
+        // ==========================================
 
-                content.classList.remove('hidden');
-                icon.style.transform = 'rotate(180deg)';
-            } else {
-                content.classList.add('hidden');
-                icon.style.transform = 'rotate(0deg)';
-            }
-        }
+        // 更新圖表數據
+        function updateChart(productId) {
+            currentMode = productId;
+            activeIndex = -1; // 重置高亮
+            hideInfoCard();
+            updateMenuActiveState(productId);
 
-        // 載入圖片與更新 UI 狀態
-        function loadChart(imageUrl, title, categoryTitle, itemId) {
-            // 1. 更新按鈕高亮狀態
-            // 清除所有高亮
-            document.querySelectorAll('button[id^="btn-"]').forEach(btn => {
-                btn.classList.remove('bg-blue-900', 'text-white', 'border-blue-500', 'bg-opacity-30');
-                btn.classList.add('border-transparent');
-            });
-            
-            // 設定當前高亮
-            const activeBtn = document.getElementById(`btn-${itemId}`);
-            if (activeBtn) {
-                activeBtn.classList.remove('border-transparent');
-                activeBtn.classList.add('bg-blue-900', 'bg-opacity-50', 'text-white', 'border-blue-500');
-            }
+            // 1. 準備 Bar Dataset (生產台數)
+            // 使用 Scriptable Options 動態改變顏色
+            const productionDataset = {
+                type: 'bar',
+                label: '生產台數',
+                data: rawData.production,
+                yAxisID: 'y',
+                backgroundColor: (context) => {
+                    // 核心高亮邏輯
+                    if (activeIndex === -1) {
+                        return 'rgba(59, 130, 246, 0.7)'; // 預設藍色
+                    }
+                    // 如果有選中項目，選中的為深藍色，其餘為灰色
+                    return context.dataIndex === activeIndex ? 
+                           'rgba(30, 58, 138, 1)' : 'rgba(203, 213, 225, 0.4)';
+                },
+                borderColor: (context) => {
+                     if (activeIndex !== -1 && context.dataIndex === activeIndex) return 'rgba(30, 58, 138, 1)';
+                     return 'transparent';
+                },
+                borderWidth: 2,
+                borderRadius: 4,
+                order: 2 // 確保 Bar 在 Line 後面
+            };
 
-            // 2. 更新文字資訊
-            chartTitle.textContent = title;
-            breadcrumbCat.textContent = categoryTitle;
-            breadcrumbItem.textContent = title;
+            // 2. 準備 Line Dataset(s)
+            let lineDatasets = [];
 
-            // 3. 圖片載入動畫與切換
-            loadingIndicator.classList.remove('hidden');
-            mainImage.classList.remove('fade-in'); // 重置動畫
-            mainImage.style.opacity = '0';
-
-            // 模擬載入延遲 (讓過渡更自然，實際使用時可移除 setTimeout)
-            setTimeout(() => {
-                mainImage.src = imageUrl;
+            if (productId === 'ALL') {
+                // 總覽模式：加入所有產品線
+                document.getElementById('header-title').textContent = '生產總覽 - 所有產品不良率';
                 
-                mainImage.onload = () => {
-                    loadingIndicator.classList.add('hidden');
-                    mainImage.style.opacity = '1';
-                    mainImage.classList.add('fade-in');
-                };
-
-                // 處理圖片載入失敗的情況
-                mainImage.onerror = () => {
-                    loadingIndicator.classList.add('hidden');
-                    mainImage.src = 'https://placehold.co/800x400?text=Image+Not+Found';
-                    mainImage.style.opacity = '1';
-                }
-            }, 100);
-        }
-
-        // 顯示當前日期
-        function updateDate() {
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' });
-            document.getElementById('current-date').textContent = dateStr;
-        }
-        
-        // 全螢幕切換
-        function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
+                Object.values(rawData.products).forEach(p => {
+                    lineDatasets.push({
+                        type: 'line',
+                        label: p.name,
+                        data: p.data,
+                        yAxisID: 'y1',
+                        borderColor: p.color,
+                        backgroundColor: p.color,
+                        borderWidth: 2,
+                        pointRadius: 2,
+                        pointHoverRadius: 5,
+                        tension: 0.3, // 稍微平滑
+                        spanGaps: true // 允許連接斷點 (針對 B產品 null)
+                    });
+                });
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
+                // 單一產品模式
+                const p = rawData.products[productId];
+                document.getElementById('header-title').textContent = `${p.name} 不良率 vs 生產台數`;
+                
+                lineDatasets.push({
+                    type: 'line',
+                    label: `${p.name} 不良率`,
+                    data: p.data,
+                    yAxisID: 'y1',
+                    borderColor: p.color,
+                    backgroundColor: p.color,
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    tension: 0.1,
+                    spanGaps: true
+                });
+            }
+
+            // 3. 更新 Chart
+            chartInstance.data.datasets = [productionDataset, ...lineDatasets];
+            chartInstance.update();
+        }
+
+        // 顯示資訊卡片
+        function showInfoCard(index) {
+            const card = document.getElementById('info-card');
+            const label = rawData.labels[index];
+            const prod = rawData.production[index];
+            
+            // 計算當前顯示產品的不良率
+            let rateText = '';
+            let rateColorClass = 'text-red-600';
+
+            if (currentMode === 'ALL') {
+                // 總覽模式下，顯示平均或提示
+                rateText = "請看圖表"; 
+                rateColorClass = "text-slate-500";
+            } else {
+                const p = rawData.products[currentMode];
+                const val = p.data[index];
+                rateText = (val !== null ? val.toFixed(2) : 'N/A') + '%';
+            }
+
+            document.getElementById('card-month').textContent = label;
+            document.getElementById('card-production').textContent = prod;
+            const rateEl = document.getElementById('card-rate');
+            rateEl.textContent = rateText;
+            rateEl.className = `text-xl font-bold ${rateColorClass}`;
+
+            card.classList.remove('hidden');
+            card.classList.add('fade-in-up');
+        }
+
+        // 隱藏資訊卡片
+        function hideInfoCard() {
+            const card = document.getElementById('info-card');
+            card.classList.add('hidden');
+            card.classList.remove('fade-in-up');
+        }
+
+        // 清除高亮
+        function resetHighlight() {
+            activeIndex = -1;
+            hideInfoCard();
+            chartInstance.update();
+        }
+
+        // 更新左側選單樣式
+        function updateMenuActiveState(id) {
+            // 移除所有 active 樣式
+            document.querySelectorAll('.menu-item').forEach(btn => {
+                btn.classList.remove('bg-blue-900', 'bg-opacity-50', 'text-white', 'border-blue-500', 'active-menu');
+                btn.classList.add('text-slate-400', 'border-transparent');
+            });
+
+            // 加入 active 樣式
+            const activeBtn = document.querySelector(`.menu-item[data-id="${id}"]`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-400', 'border-transparent');
+                activeBtn.classList.add('bg-blue-900', 'bg-opacity-50', 'text-white', 'border-blue-500', 'active-menu');
+            }
+        }
+
+        // 簡單的選單摺疊功能
+        function toggleGroup(id) {
+            const el = document.getElementById(`group-${id}`);
+            const icon = document.getElementById(`icon-${id}`);
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+                icon.classList.add('rotate-180');
+            } else {
+                el.classList.add('hidden');
+                icon.classList.remove('rotate-180');
             }
         }
 
         // 啟動
-        init();
+        window.addEventListener('load', () => {
+            lucide.createIcons();
+            initChart();
+            updateChart('A'); // 預設顯示 A 產品
+        });
 
     </script>
 </body>
